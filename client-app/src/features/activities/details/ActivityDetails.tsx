@@ -1,39 +1,42 @@
-import { Button, Card, Image } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
+import { Grid } from "semantic-ui-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { loadActivityRequest } from "../../../redux/Slice/ActivitiesSlice";
+import ActivityDetailedHeader from "./ActivityDetailedHeader";
+import ActivityDetailedInfo from "./ActivityDetailedInfo";
+import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
+import ActivityDetailedChat from "./ActivityDetailedChat";
 
-interface Props {
-  activity: Activity;
-  cancelSelectActivity: () => void;
-  openForm:(id:string)=>void;
-}
-export default function ActivityDetials({
-  activity,
-  cancelSelectActivity,
-  openForm
-}: Props) {
+export default function ActivityDetials() {
+  const dispatch = useDispatch();
+  const { selectedActivity: activity, loadingInitial } = useSelector(
+    (state: RootState) => state.activities
+  );
+
+  const { id } = useParams();
+  useEffect(() => {
+    if (id) {
+      dispatch(loadActivityRequest(id));
+    }
+  }, [id, dispatch]);
+
+  console.log("category field", activity);
+  if (loadingInitial || !activity) {
+    return <LoadingComponent />;
+  }
   return (
-    <>
-      <Card fluid>
-        <Image src={`./Asserts/categoryImages/${activity.category}.jpg`} />
-        <Card.Content>
-          <Card.Header>{activity.title}</Card.Header>
-          <Card.Meta>
-            <span>{activity.date}</span>
-          </Card.Meta>
-          <Card.Description>{activity.description}</Card.Description>
-        </Card.Content>
-        <Card.Content extra>
-          <Button.Group widths="2">
-            <Button onClick={()=>openForm(activity.id)} basic color="blue" content="Edit" />
-            <Button
-              onClick={() => cancelSelectActivity()}
-              basic
-              color="grey"
-              content="Cancel"
-            />
-          </Button.Group>
-        </Card.Content>
-      </Card>
-    </>
+    <Grid>
+      <Grid.Column width={10}>
+        <ActivityDetailedHeader activity={activity} />
+        <ActivityDetailedInfo activity={activity} />
+        <ActivityDetailedChat />
+      </Grid.Column>
+      <Grid.Column width={6}>
+        <ActivityDetailedSidebar />
+      </Grid.Column>
+    </Grid>
   );
 }

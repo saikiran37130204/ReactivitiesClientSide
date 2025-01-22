@@ -1,22 +1,31 @@
 import { Button, Container, Menu } from "semantic-ui-react";
-interface Props{
-  openForm:()=>void;
-}
-export default function NavBar({openForm}:Props) {
+import { NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { resetSelectedActivity } from "../../redux/Slice/ActivitiesSlice";
+
+export default function NavBar() {
+  const dispatch=useDispatch();
+
   return (
     <Menu inverted fixed="top">
       <Container>
-        <Menu.Item header>
+        <Menu.Item as={NavLink} to="/" header>
           <img
-            src="./Asserts/logo.png"
+            src="/Asserts/logo.png"
             alt="logo"
             style={{ marginRight: "20px" }}
           />
           Reactivities
         </Menu.Item>
-        <Menu.Item name="Activities" />
+        <Menu.Item as={NavLink} to="/activities" name="Activities" />
         <Menu.Item>
-          <Button onClick={openForm} positive content="Create Activity" />
+          <Button
+            as={NavLink}
+            to="/createActivity"
+            positive
+            content="Create Activity"
+            onClick={() => dispatch(resetSelectedActivity())}
+          />
         </Menu.Item>
       </Container>
     </Menu>
