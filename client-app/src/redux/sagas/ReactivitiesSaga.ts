@@ -46,7 +46,7 @@ function* fetchActivityByIdSaga(
       title: "",
       category: "",
       description: "",
-      date: "",
+      date: null,
       city: "",
       venue: "",
     };

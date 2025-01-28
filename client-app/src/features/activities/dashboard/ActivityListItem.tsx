@@ -1,8 +1,9 @@
 import { Button, Icon, Item, Segment } from "semantic-ui-react";
 import { Activity } from "../../../app/models/activity";
 import { Link } from "react-router-dom";
-import {/* useDispatch,*/ useSelector } from "react-redux";
+import { /* useDispatch,*/ useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
+import { format } from "date-fns";
 // import { SyntheticEvent, useState } from "react";
 // import { deleteActivityRequest } from "../../../redux/Slice/ActivitiesSlice";
 
@@ -12,9 +13,7 @@ interface Props {
 export default function ActivityListItem({ activity }: Props) {
   //const dispatch = useDispatch();
 
-  const { activities } = useSelector(
-    (state: RootState) => state.activities
-  );
+  const { activities } = useSelector((state: RootState) => state.activities);
 
   console.log("Activities By Date:", activities);
 
@@ -47,7 +46,7 @@ export default function ActivityListItem({ activity }: Props) {
       <Segment>
         <span>
           <Icon name="clock" />
-          {activity.date}
+          {format(activity.date!,'dd MMM yyyy h:mm aa')}
           <Icon name="marker" />
           {activity.venue}
         </span>

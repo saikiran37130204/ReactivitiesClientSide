@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Activity } from "../../app/models/activity";
+import { format } from "date-fns";
 
 interface ActivityState {
   activityId: string | null;
@@ -26,12 +27,12 @@ const initialState: ActivityState = {
 };
 
 const sortActivitiesByDate = (activities: Activity[]) =>
-  activities.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  activities.sort((a, b) => a.date!.getTime() - b.date!.getTime());
 
 const groupedActivities = (activities: Activity[]) => {
   return Object.entries(
     activities.reduce((activities, activity) => {
-      const date = activity.date;
+      const date = format(activity.date!,'dd MMM yyyy')
       activities[date] = activities[date]
         ? [...activities[date], activity]
         : [activity];
@@ -40,9 +41,10 @@ const groupedActivities = (activities: Activity[]) => {
   );
 };
 
-const SetActivityDate = (activity: Activity): Activity => ({
+const SetActivityDate = (activity: Activity) => ({
   ...activity,
-  date: activity.date.split("T")[0], // Format date
+  date:
+  activity.date ? new Date(activity.date) : null,
 });
 
 const activitySlice = createSlice({
@@ -54,10 +56,12 @@ const activitySlice = createSlice({
       state.error = undefined;
     },
     fetchActivitiesSuccess(state, action: PayloadAction<Activity[]>) {
-      const activities = action.payload.map((activity: Activity) =>
-        SetActivityDate(activity)
-      );
-      state.activities = activities;
+      const activities = action.payload.map((activity) => ({
+        ...activity,
+        date:
+          activity.date!
+      }));
+      state.activities = activities.map(SetActivityDate);
       state.loadingInitial = false;
       state.groupedActivities = groupedActivities(activities);
     },
@@ -72,6 +76,10 @@ const activitySlice = createSlice({
     },
     loadActivitySuccess(state, action: PayloadAction<Activity>) {
       state.loadingInitial = false;
+      state.selectedActivity = {
+        ...action.payload,
+        date: action.payload.date,
+      };
       state.selectedActivity = SetActivityDate(action.payload);
     },
     loadActivityFailure(state, action: PayloadAction<string | unknown>) {
@@ -87,7 +95,10 @@ const activitySlice = createSlice({
     },
     createActivityRequest(state, action: PayloadAction<Activity>) {
       state.loading = true;
-      state.activity = action.payload;
+      state.activity = {
+        ...action.payload,
+        date: action.payload?.date
+      };
     },
     createActivitySuccess(state, action: PayloadAction<Activity>) {
       state.loading = false;
@@ -96,7 +107,10 @@ const activitySlice = createSlice({
         action.payload,
         ...state.activities,
       ]);
-      state.selectedActivity = action.payload;
+      state.selectedActivity = {
+        ...action.payload,
+        date: action.payload?.date
+      };
     },
     createActivityFailure(state, action: PayloadAction<string | unknown>) {
       state.loading = false;
