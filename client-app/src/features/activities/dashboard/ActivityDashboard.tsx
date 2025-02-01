@@ -21,7 +21,7 @@ export default function ActivityDashboard() {
     }
   }, [activities.length, dispatch]);
 
-  if (loadingInitial) return <LoadingComponent content="Loading app" />;
+  if (loadingInitial) return <LoadingComponent content="Loading activities..." />;
 
   return (
     <Grid>

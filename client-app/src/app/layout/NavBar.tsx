@@ -1,11 +1,14 @@
-import { Button, Container, Menu } from "semantic-ui-react";
-import { NavLink } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Button, Container, Dropdown, Menu, Image } from "semantic-ui-react";
+import { Link, NavLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { resetSelectedActivity } from "../../redux/Slice/ActivitiesSlice";
+import { RootState } from "../../redux/store";
+import { logout } from "../../redux/Slice/usersSlice";
 
 export default function NavBar() {
-  const dispatch=useDispatch();
-
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.users);
+  console.log("navbar user", user);
   return (
     <Menu inverted fixed="top">
       <Container>
@@ -28,6 +31,31 @@ export default function NavBar() {
             onClick={() => dispatch(resetSelectedActivity())}
           />
         </Menu.Item>
+
+        {user && ( // Ensure user is logged in before showing the dropdown
+          <Menu.Item position="right">
+            <Image
+              src={user.image || "/Asserts/user.png"}
+              avatar
+              spaced="right"
+            />
+            <Dropdown pointing="top left" text={user.displayName}>
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  as={Link}
+                  to={`/profile/${user.Username}`}
+                  text="My Profile"
+                  icon="user"
+                />
+                <Dropdown.Item
+                  onClick={() => dispatch(logout())}
+                  text="Logout"
+                  icon="power"
+                />
+              </Dropdown.Menu>
+            </Dropdown>
+          </Menu.Item>
+        )}
       </Container>
     </Menu>
   );

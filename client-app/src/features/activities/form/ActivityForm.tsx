@@ -1,5 +1,5 @@
-import { Button, FormField, Header, Label, Segment } from "semantic-ui-react";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { Button, Header, Segment } from "semantic-ui-react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../redux/store";
 import {
@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { v4 as uuid } from "uuid";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import MyTextInput from "../../../app/common/form/MyTextInput";
 import MyTextArea from "../../../app/common/form/MyTextArea";

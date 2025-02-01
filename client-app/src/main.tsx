@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "semantic-ui-css/semantic.min.css";
 import 'react-calendar/dist/Calendar.css';
-import 'react-toastify/ReactToastify.css'
+import 'react-toastify/ReactToastify.css';
 import "./app/layout/styles.css";
 import 'react-datepicker/dist/react-datepicker.css';
 import { Provider } from "react-redux";

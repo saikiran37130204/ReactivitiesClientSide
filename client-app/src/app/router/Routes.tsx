@@ -7,16 +7,20 @@ import ActivityDetials from "../../features/activities/details/ActivityDetails";
 import TestErrors from "../../features/errors/TestError";
 import NotFound from "../../features/errors/NotFound";
 import ServerError from "../../features/errors/ServerError";
+import HomePage from "../../features/home/HomePage";
+import ModalContainer from "../common/modals/ModalContainer";
 
 export const routes: RouteObject[] = [
   {
     path: "/",
     element: <App />,
     children: [
+      { path: "/", element: <HomePage /> },
       { path: "activities", element: <ActivityDashboard /> },
       { path: "activities/:id", element: <ActivityDetials /> },
       { path: "createActivity", element: <ActivityForm key="create" /> },
       { path: "manage/:id", element: <ActivityForm key="manage" /> },
+      { path: "login", element: <ModalContainer /> },
       { path: "errors", element: <TestErrors /> },
       { path: "not-found", element: <NotFound /> },
       { path: "server-error", element: <ServerError /> },

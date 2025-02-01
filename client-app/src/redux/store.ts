@@ -3,6 +3,7 @@ import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/rootSaga";
 import activities from "./Slice/ActivitiesSlice";
 import commonErrors from "./Slice/ErrorSlice";
+import users from "./Slice/usersSlice";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -14,6 +15,7 @@ export const store = configureStore({
   reducer: {
     activities,
     commonErrors,
+    users,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
