@@ -39,10 +39,11 @@ function* fetchUser() {
     return;
   }
   try {
-    const user: User = yield call(agent.Account.current); // Fetch user from backend
+    const user: User = yield call(agent.Account.current); // Fetch full user from backend
+    localStorage.setItem("user", JSON.stringify(user)); // Store the full user object
     yield put(getUser(user));
   } catch (error: unknown) {
-    let errorMessage = "Invalid email or password";
+    let errorMessage = "Failed to fetch user data.";
     if (axios.isAxiosError(error)) {
       errorMessage =
         error.response?.data?.message || error.message || errorMessage;

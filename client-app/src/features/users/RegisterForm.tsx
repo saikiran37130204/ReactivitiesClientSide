@@ -43,7 +43,7 @@ export default function RegisterForm() {
           <MyTextInput placeholder="Email" name="email" />
           <MyTextInput placeholder="Password" name="password" type="password" />
           {error && (
-            <ValidationError errors={error as unknown as string[]}/>
+            <ValidationError errors={error}/>
           )}
           <Button
           disabled={!isValid || !dirty || loading}

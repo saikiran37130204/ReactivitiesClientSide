@@ -23,10 +23,8 @@ function App() {
     if (token) {
       dispatch(restoreUser());
       dispatch(getUserRequest());
-      dispatch(setAppLoaded());
-    } else {
-      dispatch(setAppLoaded());
     }
+    dispatch(setAppLoaded());
   }, [dispatch, token]);
 
   if (!appLoaded) return <LoadingComponent content="Loading app..." />;

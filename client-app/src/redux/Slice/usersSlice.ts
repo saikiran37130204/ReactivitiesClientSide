@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User, UserFormValues } from "../../app/models/User";
 import { router } from "../../app/router/Routes";
-import { jwtDecode } from "jwt-decode";
 
 interface UsersState {
   user: User | null | undefined;
   userFormValues: UserFormValues | undefined;
   isLoggedIn: boolean;
-  error?: string | null | unknown;
+  error?: string | null | unknown | string[];
   loading: boolean;
   token: string | null | undefined;
   appLoaded: boolean;
@@ -33,14 +32,17 @@ const userSlice = createSlice({
   reducers: {
     restoreUser(state) {
       const token = state.token;
-      if (token) {
-        state.user = jwtDecode<User>(token);
+      const storedUser = localStorage.getItem("user"); // Retrieve full user object
+
+      if (token && storedUser) {
+        state.user = JSON.parse(storedUser); // Use full user object
         state.isLoggedIn = !!state.user;
         state.error = null;
-        localStorage.setItem("jwt", token); // Set token in localStorage
       } else {
+        state.user = null;
         state.isLoggedIn = false;
-        localStorage.removeItem("jwt"); // Remove token if not available
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user"); // Ensure user data is cleared
       }
     },
     loginRequest(state, action: PayloadAction<UserFormValues>) {
@@ -53,7 +55,8 @@ const userSlice = createSlice({
       const token = action.payload.token;
       if (token) {
         state.token = token;
-        localStorage.setItem("jwt", token); // Save token in localStorage
+        localStorage.setItem("jwt", token);
+        localStorage.setItem("user", JSON.stringify(action.payload)); // Store full user
       }
       state.isLoggedIn = true;
       state.loading = false;

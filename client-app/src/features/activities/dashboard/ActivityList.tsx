@@ -8,7 +8,7 @@ export default function ActivityList() {
   const { groupedActivities } = useSelector(
     (state: RootState) => state.activities
   );
-
+  console.log("activities", groupedActivities);
   return (
     <>
       {groupedActivities.map(([group, activities]) => (

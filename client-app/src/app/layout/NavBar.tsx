@@ -8,7 +8,6 @@ import { logout } from "../../redux/Slice/usersSlice";
 export default function NavBar() {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.users);
-  console.log("navbar user", user);
   return (
     <Menu inverted fixed="top">
       <Container>
@@ -43,7 +42,7 @@ export default function NavBar() {
               <Dropdown.Menu>
                 <Dropdown.Item
                   as={Link}
-                  to={`/profile/${user.Username}`}
+                  to={`/profile/${user.username}`}
                   text="My Profile"
                   icon="user"
                 />

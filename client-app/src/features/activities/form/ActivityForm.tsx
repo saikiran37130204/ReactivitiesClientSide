@@ -1,5 +1,5 @@
 import { Button, Header, Segment } from "semantic-ui-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../redux/store";
 import {
@@ -17,30 +17,30 @@ import MyTextArea from "../../../app/common/form/MyTextArea";
 import MySelectInput from "../../../app/common/form/MySelectInput";
 import { categoreyOptions } from "../../../app/common/options/categoryOptions";
 import MyDateInput from "../../../app/common/form/MyDateInput";
-import { Activity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 
 export default function ActivityForm() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const { selectedActivity, loading, loadingInitial } = useSelector(
+  const { selectedActivity, loadingInitial } = useSelector(
     (state: RootState) => state.activities
   );
   console.log("Activity form", selectedActivity);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const initialState: Activity = useMemo(
-    () => ({
-      id: "",
-      title: "",
-      category: "",
-      description: "",
-      date: null,
-      city: "",
-      venue: "",
-    }),
-    []
-  );
+  // const initialState: Activity = useMemo(
+  //   () => ({
+  //     id: "",
+  //     title: "",
+  //     category: "",
+  //     description: "",
+  //     date: null,
+  //     city: "",
+  //     venue: "",
+  //   }),
+  //   []
+  // );
 
   const validationSchema = Yup.object({
     title: Yup.string().required("The activity title is required"),
@@ -50,9 +50,9 @@ export default function ActivityForm() {
     venue: Yup.string().required(),
     city: Yup.string().required(),
   });
-
-  console.log("Activity form", initialState);
-  const [activity, setActivity] = useState(initialState);
+  const [activity, setActivity] = useState<ActivityFormValues>(
+    new ActivityFormValues()
+  );
 
   useEffect(() => {
     if (id) {
@@ -62,29 +62,24 @@ export default function ActivityForm() {
 
   useEffect(() => {
     if (selectedActivity) {
-      setActivity(selectedActivity);
+      setActivity(new ActivityFormValues(selectedActivity));
     } else {
-      setActivity(initialState);
+      setActivity(new ActivityFormValues());
     }
-  }, [selectedActivity, initialState]);
+  }, [selectedActivity]);
 
-  function handleFormSubmit(activity: Activity) {
+  function handleFormSubmit(activity: ActivityFormValues) {
     if (activity.id) {
-      dispatch(updateActivityRequest(activity));
+      const plainActivity = { ...activity }; // Convert to plain object
+      dispatch(updateActivityRequest(plainActivity));
       navigate(`/activities/${activity.id}`);
     } else {
       activity.id = uuid();
-      dispatch(createActivityRequest(activity));
+      const plainActivity = { ...activity }; // Convert to plain object
+      dispatch(createActivityRequest(plainActivity));
       navigate(`/activities/${activity.id}`);
     }
   }
-
-  // function handleInputChange(
-  //   event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  // ) {
-  //   const { name, value } = event.target;
-  //   setActivity({ ...activity, [name]: value });
-  // }
 
   if (loadingInitial) return <LoadingComponent content="Loading activity..." />;
   return (
@@ -117,7 +112,7 @@ export default function ActivityForm() {
             <MyTextInput placeholder="Venue" name="venue" />
             <Button
               disabled={isSubmitting || !dirty || !isValid}
-              loading={loading}
+              loading={isSubmitting}
               floated="right"
               positive
               type="submit"

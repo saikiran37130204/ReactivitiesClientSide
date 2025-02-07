@@ -21,7 +21,8 @@ export default function ActivityDashboard() {
     }
   }, [activities.length, dispatch]);
 
-  if (loadingInitial) return <LoadingComponent content="Loading activities..." />;
+  if (loadingInitial)
+    return <LoadingComponent content="Loading activities..." />;
 
   return (
     <Grid>
@@ -29,7 +30,7 @@ export default function ActivityDashboard() {
         <ActivityList />
       </Grid.Column>
       <Grid.Column width="6">
-        <ActivityFilters/>
+        <ActivityFilters />
       </Grid.Column>
     </Grid>
   );
