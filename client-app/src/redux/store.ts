@@ -4,6 +4,7 @@ import rootSaga from "./sagas/rootSaga";
 import activities from "./Slice/ActivitiesSlice";
 import commonErrors from "./Slice/ErrorSlice";
 import users from "./Slice/usersSlice";
+import profile from "./Slice/profileSlice";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -16,6 +17,7 @@ export const store = configureStore({
     activities,
     commonErrors,
     users,
+    profile,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

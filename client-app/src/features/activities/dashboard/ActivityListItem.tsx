@@ -25,14 +25,18 @@ export default function ActivityListItem({ activity }: Props) {
               style={{ marginBottom: 5 }}
               size="tiny"
               circular
-              src="/Asserts/user.png"
+              src={activity.host?.image || "/Asserts/user.png"}
             />
             <Item.Content>
               <Item.Header as={Link} to={`/activities/${activity.id}`}>
                 {activity.title}
               </Item.Header>
               <Item.Description>
-                Hosted by {activity.host?.displayName || "unknown host"}
+                Hosted by{" "}
+                <Link to={`/profiles/${activity.hostUsername}`}>
+                  {" "}
+                  {activity.host?.displayName || "unknown host"}
+                </Link>
               </Item.Description>
               {activity.isHost && (
                 <Item.Description>

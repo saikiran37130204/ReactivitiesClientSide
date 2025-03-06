@@ -115,6 +115,11 @@ const userSlice = createSlice({
       state.open = false;
       state.body = null;
     },
+    setImage(state, action: PayloadAction<string>) {
+      if (state.user) {
+        state.user.image = action.payload;
+      }
+    },
   },
 });
 
@@ -133,6 +138,7 @@ export const {
   registerUserFailure,
   registerUserRequest,
   registerUserSuccess,
+  setImage
 } = userSlice.actions;
 
 export default userSlice.reducer;

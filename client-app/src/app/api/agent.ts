@@ -3,6 +3,7 @@ import { Activity, ActivityFormValues } from "../models/activity";
 import ErrorHandler from "./errorHandler";
 import { User, UserFormValues } from "../models/User";
 import store from "../../redux/store";
+import { Photo, Profile } from "../models/profile";
 
 //import { setServerError } from "../../redux/Slice/ErrorSlice";
 
@@ -50,11 +51,12 @@ const requests = {
 const Activities = {
   list: () => requests.get<Activity[]>("/activities"),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
-  create: (activity: ActivityFormValues) => axios.post<void>(`/activities`, activity),
+  create: (activity: ActivityFormValues) =>
+    axios.post<void>(`/activities`, activity),
   update: (acivity: ActivityFormValues) =>
     axios.put<void>(`/activities/${acivity.id}`, acivity),
   delete: (id: string) => requests.del<void>(`/activities/${id}`),
-  attend:(id:string)=>requests.post<void>(`/activities/${id}/attend`,{})
+  attend: (id: string) => requests.post<void>(`/activities/${id}/attend`, {}),
 };
 
 const Account = {
@@ -63,9 +65,27 @@ const Account = {
   register: (user: UserFormValues) =>
     requests.post<User>("/account/register", user),
 };
+
+const Profiles = {
+  get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
+  uploadPhoto: (blob: Blob) => {
+    const formData = new FormData();
+    formData.append("file", blob, "uploaded-image"); // Append the Blob to FormData
+
+    return axios.post<Photo>("/photos", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // Set the correct Content-Type
+      },
+    });
+  },
+  setMainPhoto:(id:string)=>requests.post(`/photos/${id}/setMain`,{}),
+  deletePhoto:(id:string)=>requests.del(`/photos/${id}`)
+};
+
 const agent = {
   Activities,
   Account,
+  Profiles,
 };
 
 export default agent;
