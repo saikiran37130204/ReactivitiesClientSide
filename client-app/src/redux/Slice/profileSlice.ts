@@ -94,6 +94,20 @@ const profileSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateProfileRequest(state, _: PayloadAction<Partial<Profile>>) {
+      state.loading = true;
+    },
+    updateProfileSuccess(state, action: PayloadAction<Partial<Profile>>) {
+      state.profile = { ...state.profile, ...(action.payload as Profile) };
+      state.loading = false;
+    },
+    updateProfileFailure(
+      state,
+      action: PayloadAction<string | null | unknown>
+    ) {
+      state.error = action.payload;
+    },
   },
 });
 
@@ -110,6 +124,9 @@ export const {
   deletePhotoRequest,
   deletePhotoSuccess,
   deletePhotoFailure,
+  updateProfileRequest,
+  updateProfileSuccess,
+  updateProfileFailure,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

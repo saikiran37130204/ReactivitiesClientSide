@@ -120,6 +120,12 @@ const userSlice = createSlice({
         state.user.image = action.payload;
       }
     },
+    setDisplayName(state,action:PayloadAction<string|undefined>){
+if(state.user){
+  state.user.displayName=action.payload;
+}
+    }
+
   },
 });
 
@@ -138,7 +144,8 @@ export const {
   registerUserFailure,
   registerUserRequest,
   registerUserSuccess,
-  setImage
+  setImage,
+  setDisplayName
 } = userSlice.actions;
 
 export default userSlice.reducer;

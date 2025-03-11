@@ -4,7 +4,10 @@ import { RootState } from "../../../redux/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { loadActivityRequest } from "../../../redux/Slice/ActivitiesSlice";
+import {
+  clearSelectedActivity,
+  loadActivityRequest,
+} from "../../../redux/Slice/ActivitiesSlice";
 import ActivityDetailedHeader from "./ActivityDetailedHeader";
 import ActivityDetailedInfo from "./ActivityDetailedInfo";
 import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
@@ -20,6 +23,8 @@ export default function ActivityDetials() {
   useEffect(() => {
     if (id) {
       dispatch(loadActivityRequest(id));
+    } else {
+      dispatch(clearSelectedActivity());
     }
   }, [id, dispatch]);
 
@@ -32,7 +37,7 @@ export default function ActivityDetials() {
       <Grid.Column width={10}>
         <ActivityDetailedHeader activity={activity} />
         <ActivityDetailedInfo activity={activity} />
-        <ActivityDetailedChat />
+        <ActivityDetailedChat activityId={activity.id} />
       </Grid.Column>
       <Grid.Column width={6}>
         <ActivityDetailedSidebar activity={activity} />

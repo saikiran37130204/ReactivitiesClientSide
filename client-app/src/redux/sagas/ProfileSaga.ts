@@ -11,11 +11,14 @@ import {
   setMainPhotoFailure,
   setMainPhotoRequest,
   setMainPhotoSuccess,
+  updateProfileFailure,
+  updateProfileRequest,
+  updateProfileSuccess,
   uploadPhotoFailure,
   uploadPhotoRequest,
   uploadPhotoSuccess,
 } from "../Slice/profileSlice";
-import { setImage } from "../Slice/usersSlice";
+import { setDisplayName, setImage } from "../Slice/usersSlice";
 import { RootState } from "../store";
 import { User } from "../../app/models/User";
 import { AxiosError, AxiosResponse } from "axios";
@@ -98,8 +101,26 @@ function* deletePhotoSaga(action: ReturnType<typeof deletePhotoRequest>) {
       console.error("failed to delete photo: ", error.message);
       yield put(deletePhotoFailure(error.message));
     } else {
-      console.error("failed delete photo: ", error);
+      console.error("failed to delete photo: ", error);
       yield put(deletePhotoFailure("failed to delete photo"));
+    }
+  }
+}
+function* updateProfileSaga(action: ReturnType<typeof updateProfileRequest>) {
+  try {
+    yield call(agent.Profiles.updateProfile, action.payload);
+    yield put(updateProfileSuccess(action.payload));
+    const user: User | null | undefined = yield select(selectUser);
+    if(action.payload.displayName && action.payload.displayName!==user?.displayName){
+    yield put(setDisplayName(action.payload.displayName));
+    }
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      console.error("failed to update profile: ", error.message);
+      yield put(updateProfileFailure(error.message));
+    } else {
+      console.error("failed to update profile: ", error);
+      yield put(updateProfileFailure("failed to update profile"));
     }
   }
 }
@@ -108,5 +129,6 @@ export function* profileSaga() {
   yield takeEvery(loadProfileRequest.type, loadProfileSaga);
   yield takeEvery(uploadPhotoRequest.type, uploadPhotoSaga);
   yield takeEvery(setMainPhotoRequest.type, setMainPhotoSaga);
-  yield takeEvery(deletePhotoRequest.type,deletePhotoSaga);
+  yield takeEvery(deletePhotoRequest.type, deletePhotoSaga);
+  yield takeEvery(updateProfileRequest.type, updateProfileSaga);
 }

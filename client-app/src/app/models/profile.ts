@@ -2,7 +2,7 @@ import { User } from "./User";
 
 export interface IProfile {
   username: string;
-  displayName: string;
+  displayName: string |undefined;
   image?: string;
   bio?: string;
   photos?: Photo[];
@@ -16,7 +16,7 @@ export class Profile implements IProfile {
   }
 
   username: string;
-  displayName: string;
+  displayName: string |undefined;
   image?: string;
   bio?: string;
   photos?: Photo[] | undefined;

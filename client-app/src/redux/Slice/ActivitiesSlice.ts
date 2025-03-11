@@ -279,6 +279,9 @@ const activitySlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    clearSelectedActivity(state){
+      state.selectedActivity=undefined;
+    }
   },
 });
 
@@ -305,6 +308,7 @@ export const {
   cancelActivityToggleRequest,
   cancelActivityToggleSuccess,
   cancelActivityToggleFailure,
+  clearSelectedActivity
 } = activitySlice.actions;
 
 export default activitySlice.reducer;
