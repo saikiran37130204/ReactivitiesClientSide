@@ -9,6 +9,9 @@ interface IProfile {
   username: string | undefined;
   uploading: boolean;
   loading: boolean;
+  followings: Profile[];
+  loadingFollowings: boolean;
+  activeTab: number;
 }
 
 const initialState: IProfile = {
@@ -18,6 +21,9 @@ const initialState: IProfile = {
   username: "",
   uploading: false,
   loading: false,
+  followings: [],
+  loadingFollowings: false,
+  activeTab: 0,
 };
 
 const profileSlice = createSlice({
@@ -108,6 +114,82 @@ const profileSlice = createSlice({
     ) {
       state.error = action.payload;
     },
+
+    updateFollowingRequest(
+      state,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _: PayloadAction<{ username: string; following: boolean }>
+    ) {
+      state.loading = true;
+    },
+    updateFollowingSuccess(
+      state,
+      action: PayloadAction<{
+        username: string;
+        following: boolean;
+        actionUsername: string;
+      }>
+    ) {
+      const { username, following, actionUsername } = action.payload;
+      
+      if (
+        state.profile &&
+        state.profile.username !== username &&
+        state.profile.username === actionUsername
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        following
+          ? state.profile.followersCount++
+          : state.profile.followersCount--;
+        state.profile.following = !state.profile.following;
+      }
+      if (state.profile && state.profile.username === username) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        following
+          ? state.profile.followingCount++
+          : state.profile.followingCount--;
+      }
+
+      state.followings.forEach((profile) => {
+    
+        if (profile.username === actionUsername) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          profile.following
+            ? profile.followersCount--
+            : profile.followersCount++;
+          profile.following = !profile.following;
+        }
+      });
+      state.loading = false;
+    },
+    updateFollowingFailure(state, action: PayloadAction<string | unknown>) {
+      state.error = action.payload;
+      state.loading = false;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    loadFollowingsRequest(state, _: PayloadAction<string>) {
+      state.loadingFollowings = true;
+    },
+    loadFollowingsSuccess(state, action: PayloadAction<Profile[]>) {
+      state.followings = action.payload;
+      state.loadingFollowings = false;
+    },
+    loadFollowingsFailure(state, action: PayloadAction<string | unknown>) {
+      state.error = action.payload;
+      state.loadingFollowings = false;
+    },
+    setActiveTabRequest(state, action: PayloadAction<number>) {
+      state.activeTab = action.payload;
+    },
+    setActiveTabSuccess(state, action: PayloadAction<number>) {
+      state.activeTab = action.payload;
+    },
+    setActiveTabFailure(state, action: PayloadAction<string | unknown>) {
+      state.error = action.payload;
+    },
+    setFollowingsEmpty(state) {
+      state.followings = [];
+    },
   },
 });
 
@@ -127,6 +209,16 @@ export const {
   updateProfileRequest,
   updateProfileSuccess,
   updateProfileFailure,
+  updateFollowingRequest,
+  updateFollowingSuccess,
+  updateFollowingFailure,
+  loadFollowingsRequest,
+  loadFollowingsSuccess,
+  loadFollowingsFailure,
+  setActiveTabRequest,
+  setActiveTabSuccess,
+  setActiveTabFailure,
+  setFollowingsEmpty,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { loadProfileRequest } from "../../redux/Slice/profileSlice";
+import { loadProfileRequest, setActiveTabRequest } from "../../redux/Slice/profileSlice";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default function ProfilePage() {
@@ -18,7 +18,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     dispatch(loadProfileRequest(username as string));
+    return()=>{
+    dispatch(setActiveTabRequest(0));
+    }
   }, [dispatch, username]);
+  
   if (loadingProfile) return <LoadingComponent content="Loading profile..." />;
   return (
     <Grid>

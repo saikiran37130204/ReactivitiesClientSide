@@ -72,6 +72,7 @@ function* fetchActivityByIdSaga(
       isCancelled: false,
       isGoing: false,
       isHost: false,
+      attendees: []
     };
     yield put(loadActivitySuccess({ activity: emptyActivity, user }));
     return;
@@ -161,6 +162,8 @@ function* cancelActivityToggleSaga() {
     yield put(updateActivityFailure({ message: errorMessage, statusCode }));
   }
 }
+
+
 export function* activitiesSaga() {
   yield takeEvery(fetchActivitiesRequest.type, fetchActivitiesSaga);
   yield takeEvery(createActivityRequest.type, createActivitySaga);

@@ -13,7 +13,7 @@ export interface IActivity {
   isGoing: boolean;
   isHost: boolean;
   host?: Profile;
-  attendees?: Profile[];
+  attendees: Profile[];
 }
 export class Activity implements IActivity {
   constructor(init: ActivityFormValues) {
@@ -43,7 +43,7 @@ export class Activity implements IActivity {
   isGoing: boolean;
   isHost: boolean;
   host?: Profile;
-  attendees?: Profile[];
+  attendees: Profile[]=[];
 }
 
 export class ActivityFormValues {

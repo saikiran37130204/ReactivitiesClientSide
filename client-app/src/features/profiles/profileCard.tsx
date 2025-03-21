@@ -1,6 +1,7 @@
 import { Card, Icon, Image } from "semantic-ui-react";
 import { Profile } from "../../app/models/profile";
 import { Link } from "react-router-dom";
+import FollowButton from "./FollowButton";
 
 interface Props {
   profile: Profile;
@@ -12,6 +13,7 @@ export default function ProfileCard({ profile }: Props) {
       return str.length > 40 ? str.substring(0, 37) + "..." : str;
     }
   }
+  console.log("profilecard",profile);
   return (
     <Card as={Link} to={`/profiles/${profile.username}`}>
       <Image src={profile.image || "/Asserts/user.png"} />
@@ -21,8 +23,9 @@ export default function ProfileCard({ profile }: Props) {
       </Card.Content>
       <Card.Content extra>
         <Icon name="user" />
-        20 followers
+        {profile.followersCount} followers
       </Card.Content>
+      <FollowButton profile={profile} />
     </Card>
   );
 }

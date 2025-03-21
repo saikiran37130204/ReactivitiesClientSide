@@ -5,12 +5,21 @@ import {
   deletePhotoFailure,
   deletePhotoRequest,
   deletePhotoSuccess,
+  loadFollowingsFailure,
+  loadFollowingsRequest,
+  loadFollowingsSuccess,
   loadProfileFailure,
   loadProfileRequest,
   loadProfileSuccess,
+  setActiveTabRequest,
+  setActiveTabSuccess,
+  setFollowingsEmpty,
   setMainPhotoFailure,
   setMainPhotoRequest,
   setMainPhotoSuccess,
+  updateFollowingFailure,
+  updateFollowingRequest,
+  updateFollowingSuccess,
   updateProfileFailure,
   updateProfileRequest,
   updateProfileSuccess,
@@ -22,8 +31,10 @@ import { setDisplayName, setImage } from "../Slice/usersSlice";
 import { RootState } from "../store";
 import { User } from "../../app/models/User";
 import { AxiosError, AxiosResponse } from "axios";
+import { updateAttendeeFollowing } from "../Slice/ActivitiesSlice";
 
 const selectUser = (state: RootState) => state.users.user;
+const selectProfile=(state:RootState)=>state.profile.profile;
 
 function* loadProfileSaga(action: ReturnType<typeof loadProfileRequest>) {
   try {
@@ -124,6 +135,61 @@ function* updateProfileSaga(action: ReturnType<typeof updateProfileRequest>) {
     }
   }
 }
+function* updateFollowingSaga(action:ReturnType<typeof updateFollowingRequest>){
+  try{
+     yield call(agent.Profiles.updateFollowing,action.payload.username);
+     yield put(updateAttendeeFollowing(action.payload.username));
+     const user:User=yield select(selectUser)
+     yield put(updateFollowingSuccess({username:user.username,following:action.payload.following,actionUsername:action.payload.username}))
+
+  }catch(error:unknown){
+    if (error instanceof AxiosError) {
+      console.error("failed to update Following: ", error.message);
+      yield put(updateFollowingFailure(error.message));
+    } else {
+      console.error("failed to update Following: ", error);
+      yield put(updateFollowingFailure("failed to update Following"));
+    }
+  }
+}
+
+function* loadFollowingsSaga(action:ReturnType<typeof loadFollowingsRequest>){
+  try{
+    const profile:Profile|null=yield select(selectProfile)
+    const followings:Profile[]=yield call(agent.Profiles.listFollowings,profile!.username,action.payload);
+    yield put(loadFollowingsSuccess(followings));
+
+  }catch(error:unknown){
+    if (error instanceof AxiosError) {
+      console.error("failed to load Following: ", error.message);
+      yield put(loadFollowingsFailure(error.message));
+    } else {
+      console.error("failed to load Following: ", error);
+      yield put(loadFollowingsFailure("failed to load Following"));
+    }
+  }
+}
+function* setActiveTabSaga(action:ReturnType<typeof setActiveTabRequest>){
+try{
+  const activeTab=action.payload
+  if(activeTab===3 || activeTab===4){
+    const predicate=activeTab===3?'followers':'following';
+    yield put(loadFollowingsRequest(predicate));
+  }else{
+    yield put(setFollowingsEmpty())
+  }
+  yield put(setActiveTabSuccess(action.payload))
+
+}catch(error:unknown){
+  if (error instanceof AxiosError) {
+    console.error("failed to set active tab: ", error.message);
+    yield put(loadFollowingsFailure(error.message));
+  } else {
+    console.error("failed to set active tab: ", error);
+    yield put(loadFollowingsFailure("failed to set active tab"));
+  }
+}
+}
 
 export function* profileSaga() {
   yield takeEvery(loadProfileRequest.type, loadProfileSaga);
@@ -131,4 +197,7 @@ export function* profileSaga() {
   yield takeEvery(setMainPhotoRequest.type, setMainPhotoSaga);
   yield takeEvery(deletePhotoRequest.type, deletePhotoSaga);
   yield takeEvery(updateProfileRequest.type, updateProfileSaga);
+  yield takeEvery(updateFollowingRequest.type, updateFollowingSaga);
+  yield takeEvery(loadFollowingsRequest.type,loadFollowingsSaga);
+  yield takeEvery(setActiveTabRequest.type,setActiveTabSaga)
 }

@@ -279,9 +279,24 @@ const activitySlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    clearSelectedActivity(state){
-      state.selectedActivity=undefined;
-    }
+    clearSelectedActivity(state) {
+      state.selectedActivity = undefined;
+    },
+
+    updateAttendeeFollowing(state, action: PayloadAction<string>) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      state.groupedActivities.forEach( ([_,activity])=>{
+        activity.forEach((activity)=>
+          activity.attendees.forEach((attendee:Profile)=>{
+            if(attendee.username==action.payload){
+              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+              attendee.following?attendee.followersCount--:attendee.followersCount++;
+              attendee.following=!attendee.following;
+            }
+          })
+        )
+      })
+    },
   },
 });
 
@@ -308,7 +323,8 @@ export const {
   cancelActivityToggleRequest,
   cancelActivityToggleSuccess,
   cancelActivityToggleFailure,
-  clearSelectedActivity
+  clearSelectedActivity,
+  updateAttendeeFollowing,
 } = activitySlice.actions;
 
 export default activitySlice.reducer;
