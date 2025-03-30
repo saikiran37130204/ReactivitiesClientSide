@@ -3,8 +3,15 @@ import { Activity, ActivityFormValues } from "../../app/models/activity";
 import { format } from "date-fns";
 import { User } from "../../app/models/User";
 import { Profile } from "../../app/models/profile";
+import { Pagination, PagingParams } from "../../app/models/pagination";
+export interface ActivityPredicate {
+  all?: boolean;
+  isGoing?: boolean;
+  isHost?: boolean;
+  startDate?: Date;
+}
 
-interface ActivityState {
+export interface ActivityState {
   activityId: string | null;
   activities: Activity[];
   groupedActivities: [string, Activity[]][];
@@ -14,6 +21,10 @@ interface ActivityState {
   loading: boolean;
   loadingInitial: boolean;
   error?: string | null | unknown | undefined;
+  pagination: Pagination | null;
+  pagingParams: PagingParams;
+  LoadingNext: boolean;
+  predicate: ActivityPredicate;
 }
 
 const initialState: ActivityState = {
@@ -26,6 +37,10 @@ const initialState: ActivityState = {
   loading: false,
   loadingInitial: false,
   error: undefined,
+  pagination: null,
+  pagingParams: { pageNumber: 1, pageSize: 2 },
+  LoadingNext: false,
+  predicate: { all: true },
 };
 
 const sortActivitiesByDate = (activities: Activity[]) => {
@@ -67,6 +82,7 @@ const SetActivityDate = (activity: Activity, user: User | null | undefined) => {
 const activitySlice = createSlice({
   name: "activities",
   initialState,
+
   reducers: {
     fetchActivitiesRequest(state) {
       state.loadingInitial = true;
@@ -74,13 +90,28 @@ const activitySlice = createSlice({
     },
     fetchActivitiesSuccess(
       state,
-      action: PayloadAction<{ activities: Activity[]; user: User | null }>
+      action: PayloadAction<{
+        result: { data: Activity[]; pagination: Pagination };
+        user: User | null;
+      }>
     ) {
+      state.loadingInitial = false;
+      const { data, pagination } = action.payload.result;
       // Map activities and ensure `date` is a Date object
-      const activities = action.payload.activities.map((activity) => ({
-        ...activity,
-        date: activity.date ? new Date(activity.date) : null,
-      }));
+
+      const activities =
+        state.pagingParams.pageNumber === 1
+          ? data.map((activity) => ({
+              ...activity,
+              date: activity.date ? new Date(activity.date) : null,
+            }))
+          : [
+              ...state.activities,
+              ...data.map((activity) => ({
+                ...activity,
+                date: activity.date ? new Date(activity.date) : null,
+              })),
+            ];
 
       // Sort activities by date
       const sortedActivities = sortActivitiesByDate(activities);
@@ -92,8 +123,8 @@ const activitySlice = createSlice({
 
       // Group activities by date
       state.groupedActivities = groupedActivities(state.activities);
-
-      state.loadingInitial = false;
+      state.pagination = pagination;
+      state.LoadingNext = false;
     },
     fetchActivitiesFailure(state, action: PayloadAction<string | unknown>) {
       state.loadingInitial = false;
@@ -111,10 +142,10 @@ const activitySlice = createSlice({
       state,
       action: PayloadAction<{ activity: Activity; user: User | null }>
     ) {
-      state.loadingInitial = false;
       const { activity, user } = action.payload;
       console.log(activity, user);
       state.selectedActivity = SetActivityDate(activity, user);
+      state.loadingInitial = false;
     },
     loadActivityFailure(state, action: PayloadAction<string | unknown>) {
       state.loadingInitial = false;
@@ -285,17 +316,68 @@ const activitySlice = createSlice({
 
     updateAttendeeFollowing(state, action: PayloadAction<string>) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      state.groupedActivities.forEach( ([_,activity])=>{
-        activity.forEach((activity)=>
-          activity.attendees.forEach((attendee:Profile)=>{
-            if(attendee.username==action.payload){
+      state.groupedActivities.forEach(([_, activity]) => {
+        activity.forEach((activity) =>
+          activity.attendees.forEach((attendee: Profile) => {
+            if (attendee.username == action.payload) {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-              attendee.following?attendee.followersCount--:attendee.followersCount++;
-              attendee.following=!attendee.following;
+              attendee.following
+                ? attendee.followersCount--
+                : attendee.followersCount++;
+              attendee.following = !attendee.following;
             }
           })
-        )
-      })
+        );
+      });
+    },
+    setPagingParams(state, action: PayloadAction<PagingParams>) {
+      state.pagingParams = action.payload;
+    },
+    SetActivityLoaderNext(state, action: PayloadAction<boolean>) {
+      state.LoadingNext = action.payload;
+    },
+    setPredicate(
+      state,
+      action: PayloadAction<{
+        predicate: keyof ActivityPredicate;
+        value: boolean | Date;
+      }>
+    ) {
+      const resetPredicate = () => {
+        // Create a new object without the properties we want to keep
+        const newPredicate: ActivityPredicate = {};
+
+        // Keep startDate if it exists
+        if ("startDate" in state.predicate) {
+          newPredicate.startDate = state.predicate.startDate;
+        }
+
+        return newPredicate;
+      };
+
+      switch (action.payload.predicate) {
+        case "all":
+          state.predicate = { ...resetPredicate(), all: true };
+          break;
+        case "isGoing":
+          state.predicate = { ...resetPredicate(), isGoing: true };
+          break;
+        case "isHost":
+          state.predicate = { ...resetPredicate(), isHost: true };
+          break;
+        case "startDate":
+          state.predicate = {
+            ...state.predicate,
+            startDate: action.payload.value as Date,
+          };
+          break;
+      }
+      console.log("predicate", state.predicate);
+    },
+    setFilters(state) {
+      state.pagingParams = { pageNumber: 1, pageSize: 2 };
+      state.activities = [];
+      state.groupedActivities = [];
     },
   },
 });
@@ -325,6 +407,10 @@ export const {
   cancelActivityToggleFailure,
   clearSelectedActivity,
   updateAttendeeFollowing,
+  setPagingParams,
+  SetActivityLoaderNext,
+  setPredicate,
+  setFilters
 } = activitySlice.actions;
 
 export default activitySlice.reducer;

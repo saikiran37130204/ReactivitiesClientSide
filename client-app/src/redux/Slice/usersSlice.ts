@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User, UserFormValues } from "../../app/models/User";
 import { router } from "../../app/router/Routes";
 
-interface UsersState {
+export interface UsersState {
   user: User | null | undefined;
   userFormValues: UserFormValues | undefined;
   isLoggedIn: boolean;

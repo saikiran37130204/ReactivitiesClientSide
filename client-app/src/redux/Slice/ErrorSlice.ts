@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ServerError } from "../../app/models/serverError";
 
-interface ErrorState {
+export interface ErrorState {
   error: ServerError | null;
 }
 

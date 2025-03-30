@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ChatComment } from "../../app/models/comment";
 
-interface CommentState {
+export interface CommentState {
   comments: ChatComment[];
 
   error: string | null | unknown | undefined;

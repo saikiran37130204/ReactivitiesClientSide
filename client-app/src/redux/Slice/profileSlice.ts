@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Photo, Profile } from "../../app/models/profile";
+import { Photo, Profile, UserActivity } from "../../app/models/profile";
 import { User } from "../../app/models/User";
 
-interface IProfile {
+export interface IProfile {
   profile: Profile | null;
   loadingProfile: boolean;
   error: string | null | unknown | undefined;
@@ -12,6 +12,8 @@ interface IProfile {
   followings: Profile[];
   loadingFollowings: boolean;
   activeTab: number;
+  UserActivities:UserActivity[];
+  loadingActivities:boolean;
 }
 
 const initialState: IProfile = {
@@ -24,6 +26,8 @@ const initialState: IProfile = {
   followings: [],
   loadingFollowings: false,
   activeTab: 0,
+  UserActivities:[],
+  loadingActivities:false
 };
 
 const profileSlice = createSlice({
@@ -190,6 +194,18 @@ const profileSlice = createSlice({
     setFollowingsEmpty(state) {
       state.followings = [];
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    loadUserActivitiesRequest(state,_:PayloadAction<{username:string,predicate?:string}>){
+      state.loadingActivities=true;
+    },
+    loadUserActivitiesSuccess(state,action:PayloadAction<UserActivity[]>){
+      state.UserActivities=action.payload;
+      state.loadingActivities=false;
+    },
+    loadUserActivitiesFailure(state,action:PayloadAction<string|unknown>){
+      state.error=action.payload;
+      state.loadingActivities=false;
+    }
   },
 });
 
@@ -219,6 +235,9 @@ export const {
   setActiveTabSuccess,
   setActiveTabFailure,
   setFollowingsEmpty,
+  loadUserActivitiesRequest,
+  loadUserActivitiesSuccess,
+  loadUserActivitiesFailure
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

@@ -3,7 +3,8 @@ import { Activity, ActivityFormValues } from "../models/activity";
 import ErrorHandler from "./errorHandler";
 import { User, UserFormValues } from "../models/User";
 import store from "../../redux/store";
-import { Photo, Profile } from "../models/profile";
+import { Photo, Profile, UserActivity } from "../models/profile";
+import { PaginatedResult } from "../models/pagination";
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -27,6 +28,14 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use(
   async (response) => {
     await sleep(1000);
+    const pagination = response.headers["pagination"];
+    if (pagination) {
+      response.data = new PaginatedResult(
+        response.data,
+        JSON.parse(pagination)
+      );
+      return response as AxiosResponse<PaginatedResult<unknown>>;
+    }
     return response;
   },
   (error: AxiosError) => {
@@ -40,14 +49,19 @@ const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
   get: <T>(url: string) => axios.get<T>(url).then(responseBody),
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   post: <T>(url: string, body: {}) =>
     axios.post<T>(url, body).then(responseBody),
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
   del: <T>(url: string) => axios.delete<T>(url).then(responseBody),
 };
 
 const Activities = {
-  list: () => requests.get<Activity[]>("/activities"),
+  list: (params: URLSearchParams) =>
+    axios
+      .get<PaginatedResult<Activity[]>>("/activities", { params })
+      .then(responseBody),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
   create: (activity: ActivityFormValues) =>
     axios.post<void>(`/activities`, activity),
@@ -76,11 +90,18 @@ const Profiles = {
       },
     });
   },
-  setMainPhoto:(id:string)=>requests.post(`/photos/${id}/setMain`,{}),
-  deletePhoto:(id:string)=>requests.del(`/photos/${id}`),
-  updateProfile:(profile:Partial<Profile>)=>requests.put(`/profiles`,profile),
-  updateFollowing:(username:string)=>requests.post(`/follow/${username}`,{}),
-  listFollowings:(username:string,predicate:string)=>requests.get<Profile>(`/follow/${username}?predicate=${predicate}`)
+  setMainPhoto: (id: string) => requests.post(`/photos/${id}/setMain`, {}),
+  deletePhoto: (id: string) => requests.del(`/photos/${id}`),
+  updateProfile: (profile: Partial<Profile>) =>
+    requests.put(`/profiles`, profile),
+  updateFollowing: (username: string) =>
+    requests.post(`/follow/${username}`, {}),
+  listFollowings: (username: string, predicate: string) =>
+    requests.get<Profile>(`/follow/${username}?predicate=${predicate}`),
+  listActivities: (username: string, predicate: string) =>
+    requests.get<UserActivity[]>(
+      `/profiles/${username}/activities?predicate=${predicate}`
+    )
 };
 
 const agent = {

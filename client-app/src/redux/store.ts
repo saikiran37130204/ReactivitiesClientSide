@@ -1,38 +1,47 @@
 import { configureStore, isPlain } from "@reduxjs/toolkit";
-import createSagaMiddleware from "redux-saga";
+import createSagaMiddleware, { SagaMiddleware } from "redux-saga";
 import rootSaga from "./sagas/rootSaga";
-import activities from "./Slice/ActivitiesSlice";
-import commonErrors from "./Slice/ErrorSlice";
-import users from "./Slice/usersSlice";
-import profile from "./Slice/profileSlice";
-import comment from "./Slice/commentSlice";
+import activitiesReducer, { ActivityState } from "./Slice/ActivitiesSlice";
+import commonErrorsReducer, { ErrorState } from "./Slice/ErrorSlice";
+import usersReducer, { UsersState } from "./Slice/usersSlice";
+import profileReducer, { IProfile } from "./Slice/profileSlice";
+import commentReducer, { CommentState } from "./Slice/commentSlice";
 
-const sagaMiddleware = createSagaMiddleware();
+// Define your complete root state type
+export interface RootState {
+  activities: ActivityState;
+  commonErrors: ErrorState;
+  users: UsersState;
+  profile: IProfile;
+  comment: CommentState;
+}
 
-const isSerializable = (value: unknown) => {
-  return value instanceof Date || isPlain(value); // Treat Date objects as serializable
-};
+// Create saga middleware with proper typing
+const sagaMiddleware: SagaMiddleware<object> = createSagaMiddleware();
 
 export const store = configureStore({
   reducer: {
-    activities,
-    commonErrors,
-    users,
-    profile,
-    comment,
+    activities: activitiesReducer,
+    commonErrors: commonErrorsReducer,
+    users: usersReducer,
+    profile: profileReducer,
+    comment: commentReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: false, // Disable thunk since you're using saga
+  middleware: (getDefaultMiddleware) => {
+    return getDefaultMiddleware({
+      thunk: false,
       serializableCheck: {
-        isSerializable,
+        isSerializable: (value: unknown) =>
+          value instanceof Date || isPlain(value),
       },
-    }).concat(sagaMiddleware),
+    }).concat(
+      sagaMiddleware
+    );
+  },
 });
 
+// Run the root saga
 sagaMiddleware.run(rootSaga);
 
-export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
 export default store;

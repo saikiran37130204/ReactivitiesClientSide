@@ -1,4 +1,12 @@
-import { call, put, select, takeEvery } from "redux-saga/effects";
+import {
+  //actionChannel,
+  call,
+  //fork,
+  put,
+  select,
+  //take,
+  takeEvery,
+} from "redux-saga/effects";
 import agent from "../../app/api/agent";
 import {
   fetchActivitiesRequest,
@@ -21,12 +29,13 @@ import {
   updateAttendanceSuccess,
   cancelActivityToggleSuccess,
   cancelActivityToggleRequest,
-  
+  ActivityPredicate,
 } from "../Slice/ActivitiesSlice";
 import { Activity, ActivityFormValues } from "../../app/models/activity";
 import { User } from "../../app/models/User";
 import { RootState } from "../store";
 import { AxiosError } from "axios";
+import { PaginatedResult } from "../../app/models/pagination";
 
 const selectActivityById = (
   state: { activities: { activities: Activity[] } },
@@ -39,14 +48,40 @@ const selectActivityById = (
 const selectUser = (state: RootState) => state.users.user;
 const selectedActivity = (state: RootState) =>
   state.activities.selectedActivity;
+const predicate = (state: RootState) => state.activities.predicate;
+
+const selectPagingParams = (state: RootState) => state.activities.pagingParams;
 
 function* fetchActivitiesSaga() {
   try {
-    const response: Activity[] = yield call(agent.Activities.list);
+    const { pageNumber, pageSize } = yield select(selectPagingParams);
+    const ActivityPredicate: ActivityPredicate = yield select(predicate);
+
+    const params = new URLSearchParams();
+    params.append("pageNumber", pageNumber.toString());
+    params.append("pageSize", pageSize.toString());
+    Object.entries(ActivityPredicate).forEach(([key, value]) => {
+      console.log("paramskey", key);
+      if (key === "startDate" && value instanceof Date) {
+        params.append(key, value.toISOString());
+      } else if (typeof value === "boolean") {
+        params.append(key, "true"); // Convert boolean to string
+      }
+    });
+
+    const response: PaginatedResult<Activity[]> = yield call(
+      agent.Activities.list,
+      params
+    );
 
     const user: User | null = yield select(selectUser);
 
-    yield put(fetchActivitiesSuccess({ activities: response, user }));
+    yield put(
+      fetchActivitiesSuccess({
+        result: { data: response.data, pagination: response.pagination },
+        user,
+      })
+    );
   } catch (error: unknown) {
     yield put(fetchActivitiesFailure(error || "Failed to fetch data."));
   }
@@ -72,7 +107,7 @@ function* fetchActivityByIdSaga(
       isCancelled: false,
       isGoing: false,
       isHost: false,
-      attendees: []
+      attendees: [],
     };
     yield put(loadActivitySuccess({ activity: emptyActivity, user }));
     return;
@@ -163,13 +198,12 @@ function* cancelActivityToggleSaga() {
   }
 }
 
-
-export function* activitiesSaga() {
+export function* activitiesSaga(): Generator<unknown, void, unknown> {
   yield takeEvery(fetchActivitiesRequest.type, fetchActivitiesSaga);
   yield takeEvery(createActivityRequest.type, createActivitySaga);
   yield takeEvery(updateActivityRequest.type, updateActivitySaga);
   yield takeEvery(deleteActivityRequest.type, deleteActivitySaga);
   yield takeEvery(loadActivityRequest.type, fetchActivityByIdSaga);
   yield takeEvery(updateAttendanceRequest.type, updateAttendanceSaga);
-  yield takeEvery(cancelActivityToggleRequest.type,cancelActivityToggleSaga);
+  yield takeEvery(cancelActivityToggleRequest.type, cancelActivityToggleSaga);
 }
