@@ -6,7 +6,7 @@ export interface UsersState {
   user: User | null | undefined;
   userFormValues: UserFormValues | undefined;
   isLoggedIn: boolean;
-  error?: string | null | unknown | string[];
+  error?: string | unknown | null;
   loading: boolean;
   token: string | null | undefined;
   appLoaded: boolean;
@@ -80,7 +80,7 @@ const userSlice = createSlice({
       state.open = false;
       state.body = null;
     },
-    registerUserFailure(state, action: PayloadAction<string | null | unknown>) {
+    registerUserFailure(state, action: PayloadAction<string | unknown>) {
       state.error = action.payload;
     },
     setAppLoaded(state) {
@@ -120,12 +120,11 @@ const userSlice = createSlice({
         state.user.image = action.payload;
       }
     },
-    setDisplayName(state,action:PayloadAction<string|undefined>){
-if(state.user){
-  state.user.displayName=action.payload;
-}
-    }
-
+    setDisplayName(state, action: PayloadAction<string | undefined>) {
+      if (state.user) {
+        state.user.displayName = action.payload;
+      }
+    },
   },
 });
 
@@ -145,7 +144,7 @@ export const {
   registerUserRequest,
   registerUserSuccess,
   setImage,
-  setDisplayName
+  setDisplayName,
 } = userSlice.actions;
 
 export default userSlice.reducer;

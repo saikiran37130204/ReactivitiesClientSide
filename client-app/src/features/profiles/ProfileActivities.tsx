@@ -30,7 +30,7 @@ export default function ProfileActivities() {
   useEffect(() => {
     dispatch(loadUserActivitiesRequest({ username: profile!.username }));
   }, [dispatch, profile]);
-  const handleTabChange = (e: SyntheticEvent, data: TabProps) => {
+  const handleTabChange = (_e: SyntheticEvent, data: TabProps) => {
     dispatch(
       loadUserActivitiesRequest({
         username: profile!.username,

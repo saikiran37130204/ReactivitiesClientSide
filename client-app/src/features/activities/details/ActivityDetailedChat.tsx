@@ -46,7 +46,7 @@ export default function ActivityDetailedChat({ activityId }: Props) {
   useEffect(() => {
     if (activityId) {
       const newConnection = new HubConnectionBuilder()
-        .withUrl("http://localhost:5000/chat?activityId=" + activityId, {
+        .withUrl(import.meta.env.VITE_CHAT_URL + "?activityId=" + activityId, {
           accessTokenFactory: () => user?.token || "",
         })
         .withAutomaticReconnect()

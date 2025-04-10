@@ -3,7 +3,7 @@ import { Profile } from "./profile";
 export interface IActivity {
   id: string;
   title: string;
-  date: Date | null;
+  date: string| null;
   description: string;
   category: string;
   city: string;
@@ -33,7 +33,7 @@ export class Activity implements IActivity {
 
   id: string;
   title: string;
-  date: Date | null;
+  date: string | null;
   description: string;
   category: string;
   city: string;
@@ -51,7 +51,7 @@ export class ActivityFormValues {
   title: string = "";
   category: string = "";
   description: string = "";
-  date: Date | null = null;
+  date: string | null = null;
   city: string = "";
   venue: string = "";
 

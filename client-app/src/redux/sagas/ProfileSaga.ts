@@ -211,12 +211,13 @@ function* loadUserActivitiesSaga(
 ) {
   const { username, predicate } = action.payload;
   try {
-    const activities: UserActivity[] = yield call(
-      agent.Profiles.listActivities,
-      username,
-      predicate
-    );
-    console.log("event activities",activities)
+    const activities: UserActivity[] = yield call(function (
+      obj: typeof agent.Profiles
+    ) {
+      return obj.listActivities(username, predicate as string);
+    },
+    agent.Profiles);
+    console.log("event activities", activities);
     yield put(loadUserActivitiesSuccess(activities));
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
@@ -238,5 +239,5 @@ export function* profileSaga() {
   yield takeEvery(updateFollowingRequest.type, updateFollowingSaga);
   yield takeEvery(loadFollowingsRequest.type, loadFollowingsSaga);
   yield takeEvery(setActiveTabRequest.type, setActiveTabSaga);
-  yield takeEvery(loadUserActivitiesRequest.type,loadUserActivitiesSaga)
+  yield takeEvery(loadUserActivitiesRequest.type, loadUserActivitiesSaga);
 }

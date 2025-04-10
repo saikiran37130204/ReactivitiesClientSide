@@ -31,7 +31,7 @@ export default function LoginForm() {
           />
           <MyTextInput placeholder="Email" name="email" />
           <MyTextInput placeholder="Password" name="password" type="password" />
-          {error && (
+          {error! && (
             <Label
               style={{ marginBottom: 10 }}
               basic

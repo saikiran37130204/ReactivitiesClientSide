@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { User } from "../../app/models/User";
 import { Profile } from "../../app/models/profile";
 import { Pagination, PagingParams } from "../../app/models/pagination";
+
 export interface ActivityPredicate {
   all?: boolean;
   isGoing?: boolean;
@@ -54,7 +55,9 @@ const sortActivitiesByDate = (activities: Activity[]) => {
 const groupedActivities = (activities: Activity[]) => {
   return Object.entries(
     activities.reduce((activities, activity) => {
-      const date = format(activity.date!, "dd MMM yyyy");
+      const date = activity.date
+        ? format(new Date(activity.date), "dd MMM yyyy")
+        : "No Date"; // Handle null case
       activities[date] = activities[date]
         ? [...activities[date], activity]
         : [activity];
@@ -63,26 +66,27 @@ const groupedActivities = (activities: Activity[]) => {
   );
 };
 
-const SetActivityDate = (activity: Activity, user: User | null | undefined) => {
+const SetActivityDate = (
+  activity: Activity,
+  user: User | null | undefined
+): Activity => {
   const host = activity.attendees?.find(
     (x) => x.username === activity.hostUsername
   );
   const going =
     activity.attendees!.some((a) => a.username === user?.username) || false;
-  console.log("setactivitydate", user, going, user?.username);
   return {
     ...activity,
     isGoing: user ? going : false,
     isHost: user ? activity.hostUsername === user.username : false,
     host: host || undefined,
-    date: activity.date ? new Date(activity.date) : null,
+    date: activity.date, // Keep as ISO string
   };
 };
 
 const activitySlice = createSlice({
   name: "activities",
   initialState,
-
   reducers: {
     fetchActivitiesRequest(state) {
       state.loadingInitial = true;
@@ -97,31 +101,15 @@ const activitySlice = createSlice({
     ) {
       state.loadingInitial = false;
       const { data, pagination } = action.payload.result;
-      // Map activities and ensure `date` is a Date object
-
       const activities =
         state.pagingParams.pageNumber === 1
-          ? data.map((activity) => ({
-              ...activity,
-              date: activity.date ? new Date(activity.date) : null,
-            }))
-          : [
-              ...state.activities,
-              ...data.map((activity) => ({
-                ...activity,
-                date: activity.date ? new Date(activity.date) : null,
-              })),
-            ];
-
-      // Sort activities by date
-      const sortedActivities = sortActivitiesByDate(activities);
-
-      // Set activity dates and host information
-      state.activities = sortedActivities.map((activity) =>
-        SetActivityDate(activity, action.payload.user)
+          ? data
+          : [...state.activities, ...data];
+      state.activities = sortActivitiesByDate(
+        activities.map((activity) =>
+          SetActivityDate(activity, action.payload.user)
+        )
       );
-
-      // Group activities by date
       state.groupedActivities = groupedActivities(state.activities);
       state.pagination = pagination;
       state.LoadingNext = false;
@@ -129,8 +117,8 @@ const activitySlice = createSlice({
     fetchActivitiesFailure(state, action: PayloadAction<string | unknown>) {
       state.loadingInitial = false;
       state.error =
-        action.payload instanceof Error
-          ? action.payload.message
+        typeof action.payload === "string"
+          ? action.payload
           : String(action.payload);
     },
     loadActivityRequest(state, action: PayloadAction<string>) {
@@ -143,16 +131,15 @@ const activitySlice = createSlice({
       action: PayloadAction<{ activity: Activity; user: User | null }>
     ) {
       const { activity, user } = action.payload;
-      console.log(activity, user);
-      state.selectedActivity = SetActivityDate(activity, user);
+      state.selectedActivity = SetActivityDate({ ...activity }, user);
       state.loadingInitial = false;
     },
     loadActivityFailure(state, action: PayloadAction<string | unknown>) {
       state.loadingInitial = false;
       state.selectedActivity = undefined;
       state.error =
-        action.payload instanceof Error
-          ? action.payload.message
+        typeof action.payload === "string"
+          ? action.payload
           : String(action.payload);
     },
     resetSelectedActivity(state) {
@@ -163,21 +150,23 @@ const activitySlice = createSlice({
     },
     createActivityRequest(state, action: PayloadAction<ActivityFormValues>) {
       state.loading = true;
-      state.activity = {
-        ...action.payload,
-        date: action.payload?.date,
-      };
-      console.log("create");
+      state.activity = { ...action.payload };
     },
     createActivitySuccess(
       state,
       action: PayloadAction<{ activity: ActivityFormValues; user: User | null }>
     ) {
       const { activity, user } = action.payload;
-      const attendee = new Profile(user!);
-      const newActivity = new Activity(activity);
-      newActivity.hostUsername = user!.username;
-      newActivity.attendees = [attendee];
+      const attendee = { ...new Profile(user!) };
+      const newActivity: Activity = {
+        ...activity,
+        id: activity.id || "",
+        hostUsername: user!.username,
+        attendees: [attendee],
+        isCancelled: false,
+        isGoing: true,
+        isHost: true,
+      };
       state.selectedActivity = SetActivityDate(newActivity, user);
       state.loading = false;
       state.editMode = false;
@@ -190,8 +179,8 @@ const activitySlice = createSlice({
     createActivityFailure(state, action: PayloadAction<string | unknown>) {
       state.loading = false;
       state.error =
-        action.payload instanceof Error
-          ? action.payload.message
+        typeof action.payload === "string"
+          ? action.payload
           : String(action.payload);
     },
     updateActivityRequest(state, action: PayloadAction<ActivityFormValues>) {
@@ -207,34 +196,30 @@ const activitySlice = createSlice({
     ) {
       state.loading = false;
       state.editMode = false;
-
-      // Convert ActivityFormValues to Activity
-      const updatedActivity = new Activity(action.payload.activityFormValues);
-
-      console.log("updatedActivity", updatedActivity);
-
-      // Update the activities array
+      const updatedActivity: Activity = {
+        ...action.payload.activityFormValues,
+        attendees: state.selectedActivity?.attendees || [],
+        hostUsername: state.selectedActivity?.hostUsername || "",
+        isCancelled: state.selectedActivity?.isCancelled || false,
+        isGoing: state.selectedActivity?.isGoing || false,
+        isHost: state.selectedActivity?.isHost || false,
+      };
       state.activities = sortActivitiesByDate(
         state.activities.map((activity) =>
           activity.id === updatedActivity.id ? updatedActivity : activity
         )
       );
-
-      // Update grouped activities
       state.groupedActivities = groupedActivities(state.activities);
-
-      // Update selectedActivity
       state.selectedActivity = SetActivityDate(
         updatedActivity,
         action.payload.user
       );
     },
     updateActivityFailure(state, action: PayloadAction<string | unknown>) {
-      console.log(action.payload);
       state.loading = false;
       state.error =
-        action.payload instanceof Error
-          ? action.payload.message
+        typeof action.payload === "string"
+          ? action.payload
           : String(action.payload);
     },
     deleteActivityRequest(state, action: PayloadAction<string>) {
@@ -254,8 +239,8 @@ const activitySlice = createSlice({
     deleteActivityFailure(state, action: PayloadAction<string | unknown>) {
       state.loading = false;
       state.error =
-        action.payload instanceof Error
-          ? action.payload.message
+        typeof action.payload === "string"
+          ? action.payload
           : String(action.payload);
     },
     updateAttendanceRequest(state) {
@@ -270,7 +255,7 @@ const activitySlice = createSlice({
           );
         state.selectedActivity.isGoing = false;
       } else {
-        const attendee = new Profile(action.payload!);
+        const attendee = { ...new Profile(action.payload!) };
         state.selectedActivity?.attendees?.push(attendee);
         state.selectedActivity!.isGoing = true;
       }
@@ -280,8 +265,8 @@ const activitySlice = createSlice({
             ? state.selectedActivity!
             : activity
         );
+        state.groupedActivities = groupedActivities(state.activities);
       }
-      state.groupedActivities = groupedActivities(state.activities);
     },
     updateAttendanceFailure(state, action: PayloadAction<string | unknown>) {
       state.error = action.payload;
@@ -306,20 +291,18 @@ const activitySlice = createSlice({
       state,
       action: PayloadAction<string | unknown>
     ) {
-      console.log("toggle error", action.payload);
       state.loading = false;
       state.error = action.payload;
     },
     clearSelectedActivity(state) {
       state.selectedActivity = undefined;
     },
-
     updateAttendeeFollowing(state, action: PayloadAction<string>) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      state.groupedActivities.forEach(([_, activity]) => {
-        activity.forEach((activity) =>
+      state.groupedActivities.forEach(([_, activities]) => {
+        activities.forEach((activity) =>
           activity.attendees.forEach((attendee: Profile) => {
-            if (attendee.username == action.payload) {
+            if (attendee.username === action.payload) {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions
               attendee.following
                 ? attendee.followersCount--
@@ -344,17 +327,12 @@ const activitySlice = createSlice({
       }>
     ) {
       const resetPredicate = () => {
-        // Create a new object without the properties we want to keep
         const newPredicate: ActivityPredicate = {};
-
-        // Keep startDate if it exists
         if ("startDate" in state.predicate) {
           newPredicate.startDate = state.predicate.startDate;
         }
-
         return newPredicate;
       };
-
       switch (action.payload.predicate) {
         case "all":
           state.predicate = { ...resetPredicate(), all: true };
@@ -372,7 +350,6 @@ const activitySlice = createSlice({
           };
           break;
       }
-      console.log("predicate", state.predicate);
     },
     setFilters(state) {
       state.pagingParams = { pageNumber: 1, pageSize: 2 };
@@ -410,7 +387,7 @@ export const {
   setPagingParams,
   SetActivityLoaderNext,
   setPredicate,
-  setFilters
+  setFilters,
 } = activitySlice.actions;
 
 export default activitySlice.reducer;

@@ -1,6 +1,6 @@
 import { Container } from "semantic-ui-react";
 import NavBar from "./NavBar";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, ScrollRestoration, useLocation } from "react-router-dom";
 import HomePage from "../../features/home/HomePage";
 import { ToastContainer } from "react-toastify";
 import { useDispatch } from "react-redux";
@@ -31,6 +31,7 @@ function App() {
 
   return (
     <>
+      <ScrollRestoration />
       <ModalContainer />
       <ToastContainer position="bottom-right" hideProgressBar theme="colored" />
       {location.pathname === "/" ? (

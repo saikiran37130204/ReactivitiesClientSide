@@ -29,19 +29,6 @@ export default function ActivityForm() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // const initialState: Activity = useMemo(
-  //   () => ({
-  //     id: "",
-  //     title: "",
-  //     category: "",
-  //     description: "",
-  //     date: null,
-  //     city: "",
-  //     venue: "",
-  //   }),
-  //   []
-  // );
-
   const validationSchema = Yup.object({
     title: Yup.string().required("The activity title is required"),
     description: Yup.string().required("The activity description is required"),

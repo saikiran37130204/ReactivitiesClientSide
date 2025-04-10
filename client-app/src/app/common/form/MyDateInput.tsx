@@ -1,17 +1,34 @@
 import { useField } from "formik";
-import DatePicker, { DatePickerProps } from "react-datepicker"; // Use DatePickerProps here
+import DatePicker from "react-datepicker";
 import { Form, Label } from "semantic-ui-react";
 
-export default function MyDateInput(props: Partial<DatePickerProps>) {
-  const [field, meta, helpers] = useField(props.name!);
+// Define a custom interface for single-date props only
+interface MyDateInputProps {
+  name: string;
+  placeholderText?: string;
+  showTimeSelect?: boolean;
+  timeCaption?: string;
+  dateFormat?: string;
+}
+
+export default function MyDateInput(props: MyDateInputProps) {
+  const [field, meta, helpers] = useField(props.name);
+
+  // Handle single date selection, converting Date to ISO string
+  const handleChange = (date: Date | null) => {
+    helpers.setValue(date ? date.toISOString() : null);
+  };
 
   return (
     <Form.Field error={meta.touched && !!meta.error}>
       <DatePicker
-        {...props}
-        selected={field.value ? new Date(field.value) : null} // Ensure the value is a Date object or null
-        onChange={(value) => helpers.setValue(value)} // Update the Formik value
-        onBlur={field.onBlur} // Pass the onBlur to Formik
+        selected={field.value ? new Date(field.value) : null} // Expect field.value as ISO string
+        onChange={handleChange}
+        onBlur={field.onBlur}
+        placeholderText={props.placeholderText}
+        showTimeSelect={props.showTimeSelect}
+        timeCaption={props.timeCaption}
+        dateFormat={props.dateFormat}
       />
       {meta.touched && meta.error ? (
         <Label basic color="red">

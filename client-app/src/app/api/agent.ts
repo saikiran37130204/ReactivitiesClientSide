@@ -12,7 +12,8 @@ const sleep = (delay: number) => {
   });
 };
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+console.log(import.meta.env.VITE_API_URL);
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 axios.interceptors.request.use((config) => {
   const token = store.getState().users.token;
@@ -27,7 +28,7 @@ axios.interceptors.request.use((config) => {
 
 axios.interceptors.response.use(
   async (response) => {
-    await sleep(1000);
+    if (import.meta.env.DEV) await sleep(1000);
     const pagination = response.headers["pagination"];
     if (pagination) {
       response.data = new PaginatedResult(
@@ -101,7 +102,7 @@ const Profiles = {
   listActivities: (username: string, predicate: string) =>
     requests.get<UserActivity[]>(
       `/profiles/${username}/activities?predicate=${predicate}`
-    )
+    ),
 };
 
 const agent = {

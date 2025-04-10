@@ -4,9 +4,9 @@ import { Button, Header } from "semantic-ui-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useDispatch } from "react-redux";
-import {  registerUserRequest } from "../../redux/Slice/usersSlice";
+import { registerUserRequest } from "../../redux/Slice/usersSlice";
 import { UserFormValues } from "../../app/models/User";
-import * as Yup from 'yup';
+import * as Yup from "yup";
 import ValidationError from "../errors/ValidationError";
 
 export default function RegisterForm() {
@@ -20,18 +20,21 @@ export default function RegisterForm() {
 
   return (
     <Formik
-      initialValues={{displayName:"",username:"", email: "", password: "" }}
+      initialValues={{ displayName: "", username: "", email: "", password: "" }}
       onSubmit={(values) => handleRegisterSubmit(values)}
-        validationSchema={Yup.object({
-          displayName:Yup.string().required(),
-          username:Yup.string().required(),
-          email:Yup.string().required(),
-          password:Yup.string().required(),
-
-        })}
+      validationSchema={Yup.object({
+        displayName: Yup.string().required(),
+        username: Yup.string().required(),
+        email: Yup.string().required(),
+        password: Yup.string().required(),
+      })}
     >
-      {({ handleSubmit,isValid,dirty}) => (
-        <Form className="ui form error" onSubmit={handleSubmit} autoComplete="off">
+      {({ handleSubmit, isValid, dirty }) => (
+        <Form
+          className="ui form error"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
           <Header
             as="h2"
             content="Sign up to Reactivities"
@@ -42,11 +45,9 @@ export default function RegisterForm() {
           <MyTextInput placeholder="Username" name="username" />
           <MyTextInput placeholder="Email" name="email" />
           <MyTextInput placeholder="Password" name="password" type="password" />
-          {error && (
-            <ValidationError errors={error}/>
-          )}
+          {error! && <ValidationError errors={[error.toString()]} />}
           <Button
-          disabled={!isValid || !dirty || loading}
+            disabled={!isValid || !dirty || loading}
             loading={loading}
             positive
             content="Register"
