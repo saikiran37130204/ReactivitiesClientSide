@@ -20,7 +20,7 @@ export default function NavBar() {
       <Container>
         <Menu.Item as={NavLink} to="/" header>
           <img
-            src="/Asserts/logo.png"
+            src="/assets/logo.png"
             alt="logo"
             style={{ marginRight: "20px" }}
           />
@@ -49,7 +49,7 @@ export default function NavBar() {
           {user ? (
             <>
               <Image
-                src={user.image || "/Asserts/user.png"}
+                src={user.image || "/assets/user.png"}
                 avatar
                 spaced="right"
               />

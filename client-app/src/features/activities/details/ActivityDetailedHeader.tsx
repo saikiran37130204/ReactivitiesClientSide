@@ -50,7 +50,7 @@ export default (function ActivityDetailedHeader({ activity }: Props) {
           />
         )}
         <Image
-          src={`/Asserts/categoryImages/${activity.category}.jpg`}
+          src={`/assets/categoryImages/${activity.category}.jpg`}
           fluid
           style={activityImageStyle}
         />

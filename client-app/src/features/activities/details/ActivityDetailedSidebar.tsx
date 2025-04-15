@@ -36,15 +36,16 @@ export default function ActivityDetailedSidebar({
                   Host
                 </Label>
               )}
-              <Image size="tiny" src={attendee.image || "/Asserts/user.png"} />
+              <Image size="tiny" src={attendee.image || "/assets/user.png"} />
               <Item.Content verticalAlign="middle">
                 <Item.Header as="h3">
                   <Link to={`/profiles/${attendee.username}`}>
                     {attendee.username}
                   </Link>
                 </Item.Header>
-                {attendee.following &&
-                <Item.Extra style={{ color: "orange" }}>Following</Item.Extra>}
+                {attendee.following && (
+                  <Item.Extra style={{ color: "orange" }}>Following</Item.Extra>
+                )}
               </Item.Content>
             </Item>
           ))}

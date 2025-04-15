@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Header, Icon } from "semantic-ui-react";
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFiles: (files: any) => void;
 }
 
@@ -19,8 +20,10 @@ export default function PhotoWidgetDropzone({ setFiles }: Props) {
   };
 
   const onDrop = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (acceptedFiles: any) => {
       setFiles(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         acceptedFiles.map((file: any) =>
           Object.assign(file, {
             preview: URL.createObjectURL(file),

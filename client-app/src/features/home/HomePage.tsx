@@ -23,7 +23,7 @@ export default function HomePage() {
         <Header as="h1" inverted>
           <Image
             size="massive"
-            src="/Asserts/logo.png"
+            src="/assets/logo.png"
             alt="logo"
             style={{ marginBottom: 12 }}
           />

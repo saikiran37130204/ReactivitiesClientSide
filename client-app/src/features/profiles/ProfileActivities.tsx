@@ -59,7 +59,7 @@ export default function ProfileActivities() {
                 key={activity.id}
               >
                 <Image
-                  src={`/Asserts/categoryImages/${activity.category}.jpg`}
+                  src={`/assets/categoryImages/${activity.category}.jpg`}
                   style={{ minHeight: 100, objectFit: "cover" }}
                 />
                 <Card.Content>

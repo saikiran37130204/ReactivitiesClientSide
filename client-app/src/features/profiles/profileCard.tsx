@@ -13,10 +13,10 @@ export default function ProfileCard({ profile }: Props) {
       return str.length > 40 ? str.substring(0, 37) + "..." : str;
     }
   }
-  console.log("profilecard",profile);
+  console.log("profilecard", profile);
   return (
     <Card as={Link} to={`/profiles/${profile.username}`}>
-      <Image src={profile.image || "/Asserts/user.png"} />
+      <Image src={profile.image || "/assets/user.png"} />
       <Card.Content>
         <Card.Header>{profile.displayName}</Card.Header>
         <Card.Description>{truncate(profile.bio)}</Card.Description>

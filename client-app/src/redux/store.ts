@@ -6,7 +6,6 @@ import commonErrorsReducer, { ErrorState } from "./Slice/ErrorSlice";
 import usersReducer, { UsersState } from "./Slice/usersSlice";
 import profileReducer, { IProfile } from "./Slice/profileSlice";
 import commentReducer, { CommentState } from "./Slice/commentSlice";
-//import { authMiddleware } from "./middleware/authMiddleware";
 
 // Define your complete root state type
 export interface RootState {
