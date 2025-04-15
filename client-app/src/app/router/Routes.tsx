@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 import App from "../layout/App";
-//import HomePage from "../../features/home/HomePage";
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
 import ActivityForm from "../../features/activities/form/ActivityForm";
 import ActivityDetials from "../../features/activities/details/ActivityDetails";
@@ -10,12 +9,14 @@ import ServerError from "../../features/errors/ServerError";
 import ModalContainer from "../common/modals/ModalContainer";
 import ProfilePage from "../../features/profiles/ProfilePage";
 import RequireAuth from "./RequireAuth";
+import HomePage from "../../features/home/HomePage";
 
 export const routes: RouteObject[] = [
   {
     path: "/",
     element: <App />,
     children: [
+      { index: true, element: <HomePage /> },
       {
         element: <RequireAuth />,
         children: [

@@ -7,27 +7,36 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import {
   getUserRequest,
+  resetJustLoggedIn,
   restoreUser,
-  setAppLoaded,
 } from "../../redux/Slice/usersSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import LoadingComponent from "./LoadingComponent";
 import ModalContainer from "../common/modals/ModalContainer";
+import { router } from "../router/Routes";
 
-function App() {
+export default function App() {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { token, appLoaded } = useSelector((state: RootState) => state.users);
+  const { token, justLoggedIn } = useSelector(
+    (state: RootState) => state.users
+  );
+
   useEffect(() => {
     if (token) {
       dispatch(restoreUser());
       dispatch(getUserRequest());
     }
-    dispatch(setAppLoaded());
   }, [dispatch, token]);
 
-  if (!appLoaded) return <LoadingComponent content="Loading app..." />;
+  useEffect(() => {
+    if (justLoggedIn && location.pathname !== "/activities") {
+      console.log("Just logged in, navigating to /activities");
+      router.navigate("/activities").then(() => {
+        dispatch(resetJustLoggedIn());
+      });
+    }
+  }, [justLoggedIn, location.pathname, dispatch]);
 
   return (
     <>
@@ -47,4 +56,3 @@ function App() {
     </>
   );
 }
-export default App;

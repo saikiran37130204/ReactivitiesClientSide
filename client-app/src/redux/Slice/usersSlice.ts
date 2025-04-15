@@ -12,6 +12,8 @@ export interface UsersState {
   appLoaded: boolean;
   open: boolean;
   body: "login" | "register" | null;
+
+  justLoggedIn: boolean;
 }
 
 const initialState: UsersState = {
@@ -24,6 +26,7 @@ const initialState: UsersState = {
   appLoaded: false,
   open: false,
   body: null,
+  justLoggedIn: false,
 };
 
 const userSlice = createSlice({
@@ -49,6 +52,7 @@ const userSlice = createSlice({
       state.userFormValues = action.payload;
       state.loading = true;
       state.error = null;
+     // state.appLoaded=false;
     },
     loginSuccess(state, action: PayloadAction<User>) {
       state.user = action.payload;
@@ -59,9 +63,11 @@ const userSlice = createSlice({
         localStorage.setItem("user", JSON.stringify(action.payload)); // Store full user
       }
       state.isLoggedIn = true;
+      state.justLoggedIn = true;
       state.loading = false;
       state.open = false;
       state.body = null;
+      //state.appLoaded=true;
     },
     loginFailure(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
@@ -96,7 +102,7 @@ const userSlice = createSlice({
       router.navigate("/");
     },
     getUserRequest(state) {
-      state.isLoggedIn = false;
+      state.error=null;
     },
     getUser(state, action: PayloadAction<User | null>) {
       state.user = action.payload;
@@ -125,6 +131,10 @@ const userSlice = createSlice({
         state.user.displayName = action.payload;
       }
     },
+
+    resetJustLoggedIn(state) {
+      state.justLoggedIn = false;
+    },
   },
 });
 
@@ -145,6 +155,7 @@ export const {
   registerUserSuccess,
   setImage,
   setDisplayName,
+  resetJustLoggedIn,
 } = userSlice.actions;
 
 export default userSlice.reducer;
