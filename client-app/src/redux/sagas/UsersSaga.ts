@@ -1,6 +1,9 @@
 import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
 import agent from "../../app/api/agent";
 import {
+  FacebookLoginFailure,
+  facebookLoginRequest,
+  facebookLoginSuccess,
   getUser,
   getUserFailure,
   getUserRequest,
@@ -63,8 +66,19 @@ function* UserRegistrationSaga(action: ReturnType<typeof registerUserRequest>) {
   }
 }
 
+function* FacebookLoginSaga(action:ReturnType<typeof facebookLoginRequest>){
+try{
+  const accessToken=action.payload;
+const user:User=yield call(agent.Account.fbLogin,accessToken);
+yield put(facebookLoginSuccess(user));
+}catch(error:string|unknown){
+  yield put(FacebookLoginFailure(error));
+}
+}
+
 export function* UsersSaga() {
   yield takeLatest(getUserRequest.type, fetchUser);
+  yield takeEvery(facebookLoginRequest.type,FacebookLoginSaga)
   yield takeEvery(loginRequest.type, UserLoginSaga);
   yield takeEvery(registerUserRequest.type, UserRegistrationSaga);
 }
