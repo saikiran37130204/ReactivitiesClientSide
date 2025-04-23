@@ -12,8 +12,8 @@ export interface UsersState {
   appLoaded: boolean;
   open: boolean;
   body: "login" | "register" | null;
-
   justLoggedIn: boolean;
+  fbLoading: boolean;
 }
 
 const initialState: UsersState = {
@@ -27,6 +27,7 @@ const initialState: UsersState = {
   open: false,
   body: null,
   justLoggedIn: false,
+  fbLoading: false,
 };
 
 const userSlice = createSlice({
@@ -52,7 +53,7 @@ const userSlice = createSlice({
       state.userFormValues = action.payload;
       state.loading = true;
       state.error = null;
-     // state.appLoaded=false;
+      // state.appLoaded=false;
     },
     loginSuccess(state, action: PayloadAction<User>) {
       state.user = action.payload;
@@ -102,7 +103,7 @@ const userSlice = createSlice({
       router.navigate("/");
     },
     getUserRequest(state) {
-      state.error=null;
+      state.error = null;
     },
     getUser(state, action: PayloadAction<User | null>) {
       state.user = action.payload;
@@ -135,6 +136,20 @@ const userSlice = createSlice({
     resetJustLoggedIn(state) {
       state.justLoggedIn = false;
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    facebookLoginRequest(state, _action: PayloadAction<string>) {
+      state.fbLoading = true;
+    },
+    facebookLoginSuccess(state, action: PayloadAction<User>) {
+      const user=action.payload;
+      state.user = user;
+      state.token=user.token;
+      state.fbLoading = false;
+    },
+    FacebookLoginFailure(state, action: PayloadAction<string | unknown>) {
+      state.error = action.payload;
+      state.fbLoading = false;
+    },
   },
 });
 
@@ -156,6 +171,9 @@ export const {
   setImage,
   setDisplayName,
   resetJustLoggedIn,
+  facebookLoginRequest,
+  facebookLoginSuccess,
+  FacebookLoginFailure,
 } = userSlice.actions;
 
 export default userSlice.reducer;
